@@ -421,11 +421,15 @@ export default function Terminal() {
     };
   }, [demoMode]);
 
-  // Cancel demo on any keypress
+  // Cancel demo on any keypress (with delay to avoid the Enter that started it)
   useEffect(() => {
     if (!demoMode) return;
 
+    let armed = false;
+    const armTimer = setTimeout(() => { armed = true; }, 500);
+
     const handleAnyKey = () => {
+      if (!armed) return;
       demoAbortRef.current = true;
       for (const t of demoTimersRef.current) {
         clearTimeout(t);
@@ -437,7 +441,10 @@ export default function Terminal() {
     };
 
     window.addEventListener('keydown', handleAnyKey);
-    return () => window.removeEventListener('keydown', handleAnyKey);
+    return () => {
+      clearTimeout(armTimer);
+      window.removeEventListener('keydown', handleAnyKey);
+    };
   }, [demoMode]);
 
   const handleSubmit = useCallback(() => {
