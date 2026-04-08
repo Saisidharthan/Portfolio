@@ -1,26 +1,471 @@
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700&display=swap');
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --bg-primary: #0c0c0c;
+  --bg-secondary: #1a1a2e;
+  --bg-titlebar: #2d2d3f;
+  --text-primary: #c8d6e5;
+  --text-green: #50fa7b;
+  --text-cyan: #8be9fd;
+  --text-yellow: #f1fa8c;
+  --text-pink: #ff79c6;
+  --text-purple: #bd93f9;
+  --text-orange: #ffb86c;
+  --text-red: #ff5555;
+  --text-blue: #6272a4;
+  --text-white: #f8f8f2;
+  --text-dim: #44475a;
+  --cursor-color: #50fa7b;
+  --selection-bg: #44475a;
+  --scrollbar-thumb: #44475a;
+  --scrollbar-track: #0c0c0c;
+  --glow-green: rgba(80, 250, 123, 0.15);
+  --glow-cyan: rgba(139, 233, 253, 0.1);
+  --scanline-opacity: 0.03;
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-background: var(--bg-primary);
+  --color-foreground: var(--text-primary);
+  --font-mono: 'JetBrains Mono', monospace;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+::selection {
+  background: var(--selection-bg);
+  color: var(--text-white);
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  font-family: 'JetBrains Mono', monospace;
+  overflow: hidden;
+  height: 100dvh;
+  width: 100vw;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background: var(--scrollbar-track);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--scrollbar-thumb);
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #6272a4;
+}
+
+/* CRT Scanline overlay */
+.scanlines::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 1px,
+    rgba(0, 0, 0, var(--scanline-opacity)) 1px,
+    rgba(0, 0, 0, var(--scanline-opacity)) 2px
+  );
+  pointer-events: none;
+  z-index: 100;
+}
+
+/* CRT flicker */
+.crt-flicker {
+  animation: crt-flicker 0.15s infinite;
+}
+
+@keyframes crt-flicker {
+  0% { opacity: 0.97; }
+  50% { opacity: 1; }
+  100% { opacity: 0.98; }
+}
+
+/* Blinking cursor */
+@keyframes blink {
+  0%, 50% { opacity: 1; }
+  51%, 100% { opacity: 0; }
+}
+
+.cursor-blink {
+  animation: blink 1s step-end infinite;
+}
+
+/* Glow effect on text */
+.glow-green {
+  text-shadow: 0 0 5px var(--glow-green), 0 0 20px rgba(80, 250, 123, 0.05);
+}
+
+.glow-cyan {
+  text-shadow: 0 0 5px var(--glow-cyan), 0 0 20px rgba(139, 233, 253, 0.05);
+}
+
+/* Boot sequence animation */
+@keyframes boot-line {
+  from { opacity: 0; transform: translateY(2px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.boot-line {
+  animation: boot-line 0.05s ease-out forwards;
+  opacity: 0;
+}
+
+/* Title bar traffic lights */
+.traffic-light {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  transition: filter 0.2s;
+}
+.traffic-light:hover {
+  filter: brightness(1.3);
+}
+
+/* Typing indicator dots */
+@keyframes typing-dot {
+  0%, 60%, 100% { opacity: 0.2; }
+  30% { opacity: 1; }
+}
+
+/* Tab autocomplete highlight */
+.autocomplete-highlight {
+  background: var(--selection-bg);
+  padding: 0 4px;
+  border-radius: 2px;
+}
+
+/* Link styles in terminal */
+.term-link {
+  color: var(--text-cyan);
+  text-decoration: underline;
+  text-decoration-color: rgba(139, 233, 253, 0.3);
+  text-underline-offset: 2px;
+  transition: text-decoration-color 0.2s;
+  cursor: pointer;
+}
+.term-link:hover {
+  text-decoration-color: var(--text-cyan);
+}
+
+/* Subtle noise background */
+.noise-bg {
+  position: fixed;
+  inset: 0;
+  opacity: 0.015;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+  pointer-events: none;
+  z-index: 99;
+}
+
+/* Glitch face container */
+.glitch-face-wrap {
+  position: relative;
+  width: 150px;
+  height: 150px;
+}
+
+.glitch-face-wrap img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 50%;
+}
+
+/* Cyberpunk base treatment on all face images */
+.glitch-face-wrap img,
+.glitch-face-stable img {
+  filter: saturate(0) contrast(1.4) brightness(1.1);
+}
+
+/* Main image - cyan duotone overlay */
+.glitch-face-wrap .glitch-main {
+  position: relative;
+  z-index: 2;
+  animation: glitch-jitter 0.15s infinite;
+}
+.glitch-face-wrap .glitch-main::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: linear-gradient(135deg, rgba(80, 250, 123, 0.25), rgba(139, 233, 253, 0.35));
+  mix-blend-mode: color;
+  z-index: 1;
+}
+
+/* Red/magenta channel copy */
+.glitch-face-wrap .glitch-r {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  opacity: 0.6;
+  animation: glitch-r 0.2s infinite;
+}
+.glitch-face-wrap .glitch-r img {
+  filter: saturate(0) brightness(0.7) contrast(1.5);
+}
+.glitch-face-wrap .glitch-r::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: rgba(255, 85, 85, 0.5);
+  mix-blend-mode: multiply;
+}
+
+/* Cyan channel copy */
+.glitch-face-wrap .glitch-c {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  opacity: 0.6;
+  animation: glitch-c 0.25s infinite;
+}
+.glitch-face-wrap .glitch-c img {
+  filter: saturate(0) brightness(0.7) contrast(1.5);
+}
+.glitch-face-wrap .glitch-c::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: rgba(139, 233, 253, 0.5);
+  mix-blend-mode: multiply;
+}
+
+/* Scan lines + noise overlay */
+.glitch-face-wrap::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  z-index: 5;
+  background:
+    repeating-linear-gradient(
+      0deg,
+      transparent 0px,
+      transparent 2px,
+      rgba(0, 255, 100, 0.06) 2px,
+      rgba(0, 255, 100, 0.06) 4px
+    );
+  animation: glitch-scan 0.5s infinite;
+  pointer-events: none;
+}
+
+/* Neon glow behind the face during glitch */
+.glitch-face-wrap::before {
+  content: '';
+  position: absolute;
+  inset: -8px;
+  border-radius: 50%;
+  z-index: 0;
+  background: radial-gradient(circle, rgba(80, 250, 123, 0.15) 0%, transparent 70%);
+  animation: glow-pulse 1s ease-in-out infinite;
+}
+
+@keyframes glow-pulse {
+  0%, 100% { opacity: 0.5; transform: scale(1); }
+  50% { opacity: 1; transform: scale(1.05); }
+}
+
+@keyframes glitch-jitter {
+  0%, 100% { transform: translate(0); }
+  10% { transform: translate(-2px, 1px); }
+  30% { transform: translate(1px, -1px); clip-path: inset(20% 0 40% 0); }
+  50% { transform: translate(-1px, 2px); }
+  70% { transform: translate(2px, 0); clip-path: inset(60% 0 10% 0); }
+  90% { transform: translate(0, -1px); clip-path: none; }
+}
+
+@keyframes glitch-r {
+  0%, 100% { transform: translate(0); }
+  20% { transform: translate(4px, -2px); }
+  40% { transform: translate(-3px, 1px); }
+  60% { transform: translate(5px, 2px); }
+  80% { transform: translate(-4px, -1px); }
+}
+
+@keyframes glitch-c {
+  0%, 100% { transform: translate(0); }
+  15% { transform: translate(-4px, 2px); }
+  35% { transform: translate(3px, -1px); }
+  55% { transform: translate(-5px, -2px); }
+  75% { transform: translate(4px, 1px); }
+}
+
+@keyframes glitch-scan {
+  0% { opacity: 0.5; }
+  50% { opacity: 1; }
+  100% { opacity: 0.5; }
+}
+
+/* Stable state - cyberpunk duotone */
+.glitch-face-stable {
+  position: relative;
+  width: 150px;
+  height: 150px;
+}
+
+.glitch-face-stable img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 50%;
+  filter: saturate(0) contrast(1.4) brightness(1.1);
+  animation: glitch-settle 0.6s ease-out forwards;
+}
+
+/* Green/cyan duotone overlay on stable */
+.glitch-face-stable::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: linear-gradient(135deg, rgba(80, 250, 123, 0.2), rgba(139, 233, 253, 0.3));
+  mix-blend-mode: color;
+  z-index: 1;
+  pointer-events: none;
+}
+
+/* Neon glow on stable */
+.glitch-face-stable::before {
+  content: '';
+  position: absolute;
+  inset: -6px;
+  border-radius: 50%;
+  z-index: 0;
+  background: radial-gradient(circle, rgba(80, 250, 123, 0.12) 0%, transparent 70%);
+}
+
+@keyframes glitch-settle {
+  0% { transform: translate(-2px, 1px); }
+  30% { transform: translate(1px, 0); }
+  100% { transform: translate(0); }
+}
+
+/* Glitch border ring */
+.glitch-ring {
+  position: absolute;
+  inset: -4px;
+  border-radius: 50%;
+  border: 2px solid #50fa7b;
+  animation: ring-glitch 0.3s infinite;
+  z-index: 4;
+}
+
+@keyframes ring-glitch {
+  0%, 100% { border-color: #50fa7b; transform: rotate(0deg); }
+  25% { border-color: #ff5555; transform: rotate(1deg) scale(1.02); }
+  50% { border-color: #8be9fd; transform: rotate(-1deg) scale(0.98); }
+  75% { border-color: #bd93f9; transform: rotate(0.5deg); }
+}
+
+.glitch-ring-stable {
+  position: absolute;
+  inset: -4px;
+  border-radius: 50%;
+  border: 2px solid #50fa7b;
+  box-shadow: 0 0 20px rgba(80, 250, 123, 0.4), 0 0 60px rgba(80, 250, 123, 0.1);
+  z-index: 4;
+  animation: ring-settle 0.5s ease-out forwards;
+}
+
+@keyframes ring-settle {
+  0% { border-color: #8be9fd; box-shadow: 0 0 30px rgba(139, 233, 253, 0.5); }
+  100% { border-color: #50fa7b; box-shadow: 0 0 20px rgba(80, 250, 123, 0.4), 0 0 60px rgba(80, 250, 123, 0.1); }
+}
+
+/* ── CRT Power-On Effect ────────────────────────────── */
+
+/* Stage 1: thin horizontal line appears */
+.crt-power-line {
+  height: 2px;
+  background: #fff;
+  box-shadow:
+    0 0 8px 2px rgba(255, 255, 255, 0.6),
+    0 0 30px 4px rgba(139, 233, 253, 0.3);
+  animation: crt-line-in 0.5s ease-out forwards;
+}
+
+@keyframes crt-line-in {
+  0% { width: 0; margin-left: 50%; opacity: 0; }
+  30% { opacity: 1; }
+  100% { width: 100%; margin-left: 0; opacity: 1; }
+}
+
+/* Stage 2: line expands vertically to fill screen */
+.crt-power-expand {
+  height: 2px;
+  width: 100%;
+  background: var(--bg-primary, #0c0c0c);
+  box-shadow:
+    0 0 15px 3px rgba(139, 233, 253, 0.2),
+    0 0 60px 10px rgba(80, 250, 123, 0.05);
+  animation: crt-expand 0.5s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+@keyframes crt-expand {
+  0% {
+    height: 2px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: #fff;
+    box-shadow: 0 0 15px 3px rgba(255, 255, 255, 0.5);
+  }
+  40% {
+    height: 10px;
+    background: rgba(139, 233, 253, 0.8);
+    box-shadow: 0 0 40px 10px rgba(139, 233, 253, 0.3);
+  }
+  100% {
+    height: 100vh;
+    top: 0;
+    transform: translateY(0);
+    background: var(--bg-primary, #0c0c0c);
+    box-shadow: none;
+  }
+}
+
+/* Stage 3: white flash */
+.crt-flash {
+  position: fixed;
+  inset: 0;
+  background: white;
+  animation: crt-flash-anim 0.2s ease-out forwards;
+  z-index: 100;
+  pointer-events: none;
+}
+
+@keyframes crt-flash-anim {
+  0% { opacity: 0.7; }
+  100% { opacity: 0; }
+}
+
+/* Stage 4: done — just the bg */
+.crt-power-done {
+  height: 100vh;
+  width: 100%;
+  background: var(--bg-primary, #0c0c0c);
+  top: 0;
+  transform: translateY(0);
+}
+
+/* Mobile input styling */
+@media (max-width: 640px) {
+  body {
+    font-size: 13px;
+  }
 }
