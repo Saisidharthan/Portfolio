@@ -291,12 +291,12 @@ export default function Terminal() {
 
   // Demo mode sequence
   const DEMO_SEQUENCE = [
-    { cmd: 'whoami', pause: 2500 },
-    { cmd: 'experience', pause: 4000 },
-    { cmd: 'skills', pause: 3000 },
-    { cmd: 'projects --ai', pause: 3000 },
-    { cmd: 'contact', pause: 2500 },
-    { cmd: 'sudo hire-me', pause: 3000 },
+    { cmd: 'whoami', pause: 5000 },
+    { cmd: 'experience', pause: 8000 },
+    { cmd: 'skills', pause: 6000 },
+    { cmd: 'projects --ai', pause: 6000 },
+    { cmd: 'contact', pause: 5000 },
+    { cmd: 'sudo hire-me', pause: 5000 },
   ];
 
   useEffect(() => {
@@ -315,7 +315,7 @@ export default function Terminal() {
         for (let c = 0; c < cmd.length; c++) {
           if (demoAbortRef.current) return;
           const char = cmd[c];
-          const delay = 40 + Math.random() * 40;
+          const delay = 80 + Math.random() * 70;
           await new Promise<void>((resolve) => {
             const t = setTimeout(() => {
               if (demoAbortRef.current) { resolve(); return; }
@@ -391,9 +391,38 @@ export default function Terminal() {
 
         if (demoAbortRef.current) return;
 
-        // Wait pause duration
+        // Lazy scroll during pause — scroll slowly so user can read
+        const scrollContainer = terminalRef.current;
+        if (scrollContainer) {
+          const scrollTarget = scrollContainer.scrollHeight - scrollContainer.clientHeight;
+          const scrollStart = scrollContainer.scrollTop;
+          const scrollDist = scrollTarget - scrollStart;
+          if (scrollDist > 0) {
+            const scrollDuration = Math.min(pause * 0.7, 2000);
+            const scrollSteps = 30;
+            const stepDelay = scrollDuration / scrollSteps;
+            for (let s = 1; s <= scrollSteps; s++) {
+              if (demoAbortRef.current) break;
+              await new Promise<void>((resolve) => {
+                const t = setTimeout(() => {
+                  if (scrollContainer) {
+                    const ease = s / scrollSteps;
+                    const easeOut = 1 - Math.pow(1 - ease, 3);
+                    scrollContainer.scrollTop = scrollStart + scrollDist * easeOut;
+                  }
+                  resolve();
+                }, stepDelay);
+                demoTimersRef.current.push(t);
+              });
+            }
+          }
+        }
+
+        if (demoAbortRef.current) return;
+
+        // Wait remaining pause duration
         await new Promise<void>((resolve) => {
-          const t = setTimeout(resolve, pause);
+          const t = setTimeout(resolve, pause * 0.3);
           demoTimersRef.current.push(t);
         });
       }
