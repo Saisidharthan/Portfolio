@@ -325,8 +325,6 @@ function formatExperience(): CommandResult {
   \x1b[white]  Also contributed to core product implementation.
   \x1b[pink]  Learned:\x1b[dim] Cloud security, compliance frameworks, DevOps
   \x1b[yellow]  Stack:\x1b[white] AWS, DevOps, InfoSec, ISO/SOC2, Monitoring`,
-      image: '/images/riverline-team.png',
-      imageAlt: 'Riverline AI Team',
     },
     {
       text: `  \x1b[green]● Co-Founder — Synergeek Technologies    \x1b[dim]1.7 yrs · Present
@@ -345,8 +343,6 @@ function formatExperience(): CommandResult {
   \x1b[white]  Bridged hardware and software through board support packages.
   \x1b[pink]  Learned:\x1b[dim] Embedded systems, BSP, hardware-software integration
   \x1b[yellow]  Stack:\x1b[white] MCP, Board Support Packages, Server Integration`,
-      image: '/images/lgsi-team.png',
-      imageAlt: 'LG Soft India Team',
     },
     {
       text: `  \x1b[green]● GenAI Engineer — GyanMatrix Technologies      \x1b[dim]4 months
@@ -356,8 +352,6 @@ function formatExperience(): CommandResult {
   \x1b[white]  and streamline onboarding workflows.
   \x1b[pink]  Learned:\x1b[dim] GenAI in production, KYC automation, LLM pipelines
   \x1b[yellow]  Stack:\x1b[white] Python, LangChain, GenAI, LLMs`,
-      image: '/images/gyanmatrix.png',
-      imageAlt: 'GyanMatrix Office',
     },
   ];
 
