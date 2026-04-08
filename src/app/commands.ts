@@ -50,9 +50,8 @@ export function processCommand(
     case 'education':
       return { output: formatEducation() };
     case 'experience':
-      return formatExperience();
     case 'timeline':
-      return { output: formatTimeline() };
+      return formatExperience();
     case 'contact':
       return { output: formatContact() };
     case 'resume':
@@ -321,54 +320,48 @@ function formatEducation(): string {
 }
 
 function formatExperience(): CommandResult {
-  const header = `\x1b[cyan]─── Work Experience ───────────────────────────────────────`;
-
-  const cards: ExperienceCard[] = [
-    {
-      text: `  \x1b[green]● SDE — Riverline AI                          \x1b[dim]Current
-  \x1b[dim]  ────────────────────────────────────────
-  \x1b[white]  Spearheaded DevOps & InfoSec operations to achieve ISO
-  \x1b[white]  and SOC2 certification. Managed and monitored cloud
-  \x1b[white]  infrastructure, ensuring system security and compliance.
-  \x1b[white]  Also contributed to core product implementation.
-  \x1b[pink]  Learned:\x1b[dim] Cloud security, compliance frameworks, DevOps
-  \x1b[yellow]  Stack:\x1b[white] AWS, DevOps, InfoSec, ISO/SOC2, Monitoring`,
-    },
-    {
-      text: `  \x1b[green]● Co-Founder — Synergeek Technologies    \x1b[dim]1.7 yrs · Present
-  \x1b[dim]  ────────────────────────────────────────
-  \x1b[white]  Built the company from the ground up. Scaled operations,
-  \x1b[white]  acquired clients, drove conversions, and managed the team.
-  \x1b[white]  Hands-on with implementation across all client projects.
-  \x1b[pink]  Learned:\x1b[dim] Startup ops, client acquisition, team leadership
-  \x1b[yellow]  Stack:\x1b[white] Next.js, React, Python, AI/ML, Business Dev`,
-    },
-    {
-      text: `  \x1b[green]● BSP Engineer — LG Soft India (LGSI)          \x1b[dim]8 months
-  \x1b[dim]  ────────────────────────────────────────
-  \x1b[white]  Built MCP integrations to connect TV boards with servers,
-  \x1b[white]  enabling chat-based access to original LG TV boards.
-  \x1b[white]  Bridged hardware and software through board support packages.
-  \x1b[pink]  Learned:\x1b[dim] Embedded systems, BSP, hardware-software integration
-  \x1b[yellow]  Stack:\x1b[white] MCP, Board Support Packages, Server Integration`,
-    },
-    {
-      text: `  \x1b[green]● GenAI Engineer — GyanMatrix Technologies      \x1b[dim]4 months
-  \x1b[dim]  ────────────────────────────────────────
-  \x1b[white]  Developed a KYC (Know Your Customer) bot powered by
-  \x1b[white]  Generative AI to automate customer identity verification
-  \x1b[white]  and streamline onboarding workflows.
-  \x1b[pink]  Learned:\x1b[dim] GenAI in production, KYC automation, LLM pipelines
-  \x1b[yellow]  Stack:\x1b[white] Python, LangChain, GenAI, LLMs`,
-    },
-  ];
-
-  const footer = `\n\x1b[dim]──────────────────────────────────────────────────────────
-  \x1b[dim]Type \x1b[yellow]education\x1b[dim] to see my academic background.`;
-
   return {
-    output: header + '\n\n' + footer,
-    experienceCards: cards,
+    output: `\x1b[cyan]─── Career Timeline ───────────────────────────────────────
+
+  \x1b[dim]2024
+  \x1b[dim]  │
+  \x1b[dim]  ├──\x1b[green] ● \x1b[white]GenAI Engineer — GyanMatrix Technologies     \x1b[dim]4 months
+  \x1b[dim]  │   Developed a KYC (Know Your Customer) bot powered by
+  \x1b[dim]  │   Generative AI to automate customer identity verification
+  \x1b[dim]  │   and streamline onboarding workflows.
+  \x1b[dim]  │   \x1b[pink]Learned:\x1b[dim] GenAI in production, KYC automation, LLM pipelines
+  \x1b[dim]  │   \x1b[yellow]Stack:\x1b[white] Python, LangChain, GenAI, LLMs
+  \x1b[dim]  │
+  \x1b[dim]  ├──\x1b[green] ● \x1b[white]BSP Engineer — LG Soft India (LGSI)          \x1b[dim]8 months
+  \x1b[dim]  │   Built MCP integrations to connect TV boards with servers,
+  \x1b[dim]  │   enabling chat-based access to original LG TV boards.
+  \x1b[dim]  │   Bridged hardware and software through board support packages.
+  \x1b[dim]  │   \x1b[pink]Learned:\x1b[dim] Embedded systems, BSP, hardware-software integration
+  \x1b[dim]  │   \x1b[yellow]Stack:\x1b[white] MCP, Board Support Packages, Server Integration
+  \x1b[dim]  │
+  \x1b[dim]2025
+  \x1b[dim]  │
+  \x1b[dim]  ├──\x1b[yellow] ● \x1b[white]Co-Founder — Synergeek Technologies         \x1b[dim]1.7 yrs · Present
+  \x1b[dim]  │   Built the company from the ground up. Scaled operations,
+  \x1b[dim]  │   acquired clients, drove conversions, and managed the team.
+  \x1b[dim]  │   Hands-on with implementation across all client projects.
+  \x1b[dim]  │   \x1b[pink]Learned:\x1b[dim] Startup ops, client acquisition, team leadership
+  \x1b[dim]  │   \x1b[yellow]Stack:\x1b[white] Next.js, React, Python, AI/ML, Business Dev
+  \x1b[dim]  │
+  \x1b[dim]2026
+  \x1b[dim]  │
+  \x1b[dim]  ├──\x1b[cyan] ● \x1b[white]SDE — Riverline AI                           \x1b[cyan]Current
+  \x1b[dim]  │   Spearheaded DevOps & InfoSec operations to achieve ISO
+  \x1b[dim]  │   and SOC2 certification. Managed and monitored cloud
+  \x1b[dim]  │   infrastructure, ensuring system security and compliance.
+  \x1b[dim]  │   \x1b[pink]Learned:\x1b[dim] Cloud security, compliance frameworks, DevOps
+  \x1b[dim]  │   \x1b[yellow]Stack:\x1b[white] AWS, DevOps, InfoSec, ISO/SOC2, Monitoring
+  \x1b[dim]  │
+  \x1b[dim]  ▼
+  \x1b[green]  What's next?
+
+\x1b[dim]──────────────────────────────────────────────────────────
+  \x1b[dim]Type \x1b[yellow]education\x1b[dim] to see my academic background.`,
   };
 }
 
@@ -554,33 +547,6 @@ function handleRm(args: string[]): CommandResult {
   };
 }
 
-function formatTimeline(): string {
-  return `\x1b[cyan]─── Career Timeline ───────────────────────────────────────
-
-  \x1b[dim]2024
-  \x1b[dim]  │
-  \x1b[dim]  ├──\x1b[green] ● \x1b[white]GenAI Engineer — GyanMatrix Technologies
-  \x1b[dim]  │   \x1b[dim]4 months · Built KYC bot with GenAI
-  \x1b[dim]  │
-  \x1b[dim]  ├──\x1b[green] ● \x1b[white]BSP Engineer — LG Soft India (LGSI)
-  \x1b[dim]  │   \x1b[dim]8 months · MCP integrations for TV boards
-  \x1b[dim]  │
-  \x1b[dim]2025
-  \x1b[dim]  │
-  \x1b[dim]  ├──\x1b[yellow] ● \x1b[white]Co-Founder — Synergeek Technologies
-  \x1b[dim]  │   \x1b[dim]1.7 yrs · Built & scaled the company
-  \x1b[dim]  │
-  \x1b[dim]2026
-  \x1b[dim]  │
-  \x1b[dim]  ├──\x1b[cyan] ● \x1b[white]SDE — Riverline AI
-  \x1b[dim]  │   \x1b[cyan]Current · DevOps, InfoSec, ISO/SOC2
-  \x1b[dim]  │
-  \x1b[dim]  ▼
-  \x1b[dim]  \x1b[green]What's next?
-
-\x1b[dim]──────────────────────────────────────────────────────────
-  \x1b[dim]Type \x1b[yellow]experience\x1b[dim] for detailed work history.`;
-}
 
 function handleOpen(name: string): CommandResult {
   if (!name) {
