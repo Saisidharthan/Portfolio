@@ -163,15 +163,27 @@ export default function Terminal() {
   const [bootComplete, setBootComplete] = useState(false);
   const [lineCounter, setLineCounter] = useState(0);
   const [tabSuggestions, setTabSuggestions] = useState<string[]>([]);
+  const [visitorCount, setVisitorCount] = useState<number | null>(null);
+  const [demoMode, setDemoMode] = useState(false);
 
   const inputRef = useRef<HTMLInputElement>(null);
   const terminalRef = useRef<HTMLDivElement>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
+  const demoTimersRef = useRef<ReturnType<typeof setTimeout>[]>([]);
+  const demoAbortRef = useRef(false);
 
   const nextId = useCallback(() => {
     setLineCounter((c) => c + 1);
     return lineCounter;
   }, [lineCounter]);
+
+  // Track visitor count on mount
+  useEffect(() => {
+    fetch('/api/visit', { method: 'POST' })
+      .then((res) => res.json())
+      .then((data) => setVisitorCount(data.total))
+      .catch(() => {});
+  }, []);
 
   // Phase 1: Glitch name + face reveal
   useEffect(() => {
@@ -260,19 +272,173 @@ export default function Terminal() {
   // Set initial lines after boot
   useEffect(() => {
     if (bootComplete) {
+      const visitorLine = visitorCount
+        ? `\n\x1b[dim]  You are visitor \x1b[cyan]#${visitorCount}\x1b[dim] — welcome!`
+        : '';
       setLines([
         { id: 0, type: 'banner', content: ASCII_BANNER },
-        { id: 1, type: 'output', content: WELCOME_MESSAGE },
+        { id: 1, type: 'output', content: WELCOME_MESSAGE + visitorLine },
       ]);
       setLineCounter(2);
       setTimeout(() => inputRef.current?.focus(), 100);
     }
-  }, [bootComplete]);
+  }, [bootComplete, visitorCount]);
 
   // Auto scroll
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [lines, bootLines]);
+
+  // Demo mode sequence
+  const DEMO_SEQUENCE = [
+    { cmd: 'whoami', pause: 2500 },
+    { cmd: 'experience', pause: 4000 },
+    { cmd: 'skills', pause: 3000 },
+    { cmd: 'projects --ai', pause: 3000 },
+    { cmd: 'contact', pause: 2500 },
+    { cmd: 'sudo hire-me', pause: 3000 },
+  ];
+
+  useEffect(() => {
+    if (!demoMode) return;
+
+    demoAbortRef.current = false;
+    demoTimersRef.current = [];
+
+    const runDemo = async () => {
+      for (let i = 0; i < DEMO_SEQUENCE.length; i++) {
+        if (demoAbortRef.current) return;
+
+        const { cmd, pause } = DEMO_SEQUENCE[i];
+
+        // Type each character
+        for (let c = 0; c < cmd.length; c++) {
+          if (demoAbortRef.current) return;
+          const char = cmd[c];
+          const delay = 40 + Math.random() * 40;
+          await new Promise<void>((resolve) => {
+            const t = setTimeout(() => {
+              if (demoAbortRef.current) { resolve(); return; }
+              setInput((prev) => prev + char);
+              resolve();
+            }, delay);
+            demoTimersRef.current.push(t);
+          });
+        }
+
+        if (demoAbortRef.current) return;
+
+        // Small pause before "pressing Enter"
+        await new Promise<void>((resolve) => {
+          const t = setTimeout(resolve, 300);
+          demoTimersRef.current.push(t);
+        });
+
+        if (demoAbortRef.current) return;
+
+        // Submit the command — we need to read input at this point
+        // Use a functional approach: set a flag and trigger submit via state
+        setInput((currentInput) => {
+          // Process command with current input value
+          const trimmed = currentInput.trim();
+          const commandLine: OutputLine = {
+            id: 0, // will be overridden
+            type: 'command',
+            content: trimmed,
+            prompt: 'sai@portfolio:~$',
+          };
+
+          if (trimmed) {
+            setHistory((prev) => [...prev, trimmed]);
+          }
+          setHistoryIndex(-1);
+
+          const result = processCommand(trimmed, [], visitorCount);
+
+          if (result.clear) {
+            setLines([]);
+          } else {
+            if (result.theme) {
+              const root = document.documentElement;
+              for (const [key, value] of Object.entries(result.theme)) {
+                root.style.setProperty(key, value);
+              }
+            }
+            if (result.openUrl) {
+              window.open(result.openUrl, '_blank', 'noopener,noreferrer');
+            }
+
+            const outputLine: OutputLine = {
+              id: 0,
+              type: 'output',
+              content: result.output,
+              experienceCards: result.experienceCards,
+            };
+
+            setLines((prev) => {
+              const nextBase = prev.length > 0 ? Math.max(...prev.map((l) => l.id)) + 1 : 0;
+              return [
+                ...prev,
+                { ...commandLine, id: nextBase },
+                { ...outputLine, id: nextBase + 1 },
+              ];
+            });
+          }
+
+          setLineCounter((c) => c + 2);
+          return ''; // clear input
+        });
+
+        if (demoAbortRef.current) return;
+
+        // Wait pause duration
+        await new Promise<void>((resolve) => {
+          const t = setTimeout(resolve, pause);
+          demoTimersRef.current.push(t);
+        });
+      }
+
+      if (demoAbortRef.current) return;
+
+      // Demo complete message
+      const completeMsg = '\x1b[dim]── Demo complete ──────────────────────────────\n  Type \x1b[yellow]help\x1b[dim] to explore on your own.\n  Or just \x1b[yellow]sudo hire-me\x1b[dim] again. You know you want to.';
+      setLines((prev) => {
+        const nextId = prev.length > 0 ? Math.max(...prev.map((l) => l.id)) + 1 : 0;
+        return [...prev, { id: nextId, type: 'output', content: completeMsg }];
+      });
+      setLineCounter((c) => c + 1);
+      setDemoMode(false);
+    };
+
+    runDemo();
+
+    return () => {
+      demoAbortRef.current = true;
+      for (const t of demoTimersRef.current) {
+        clearTimeout(t);
+      }
+      demoTimersRef.current = [];
+    };
+  }, [demoMode]);
+
+  // Cancel demo on any keypress
+  useEffect(() => {
+    if (!demoMode) return;
+
+    const handleAnyKey = () => {
+      demoAbortRef.current = true;
+      for (const t of demoTimersRef.current) {
+        clearTimeout(t);
+      }
+      demoTimersRef.current = [];
+      setDemoMode(false);
+      setInput('');
+      setTimeout(() => inputRef.current?.focus(), 50);
+    };
+
+    window.addEventListener('keydown', handleAnyKey);
+    return () => window.removeEventListener('keydown', handleAnyKey);
+  }, [demoMode]);
 
   const handleSubmit = useCallback(() => {
     const trimmed = input.trim();
@@ -290,7 +456,7 @@ export default function Terminal() {
     }
     setHistoryIndex(-1);
 
-    const result = processCommand(trimmed, history);
+    const result = processCommand(trimmed, history, visitorCount);
 
     if (result.clear) {
       setLines([]);
@@ -320,6 +486,10 @@ export default function Terminal() {
     setLines((prev) => [...prev, commandLine, outputLine]);
     setInput('');
     setLineCounter((c) => c + 2);
+
+    if (result.startDemo) {
+      setDemoMode(true);
+    }
   }, [input, history, lineCounter]);
 
   const handleKeyDown = useCallback(
@@ -687,19 +857,28 @@ export default function Terminal() {
           borderTop: '1px solid rgba(255,255,255,0.05)',
         }}
       >
-        <div className="flex items-center gap-4">
-          <span>
-            <span style={{ color: '#50fa7b' }}>●</span> connected
-          </span>
-          <span>
-            sai@portfolio
-          </span>
-        </div>
-        <div className="flex items-center gap-4">
-          <span>{history.length} cmds</span>
-          <span>UTF-8</span>
-          <span>zsh</span>
-        </div>
+        {demoMode ? (
+          <div className="flex items-center gap-2">
+            <span style={{ color: '#f1fa8c' }}>▶ DEMO</span>
+            <span style={{ color: '#6272a4' }}>— press any key to exit</span>
+          </div>
+        ) : (
+          <div className="flex items-center gap-4">
+            <span>
+              <span style={{ color: '#50fa7b' }}>●</span> connected
+            </span>
+            <span>
+              sai@portfolio
+            </span>
+          </div>
+        )}
+        {!demoMode && (
+          <div className="flex items-center gap-4">
+            <span>{history.length} cmds</span>
+            <span>UTF-8</span>
+            <span>zsh</span>
+          </div>
+        )}
       </div>
     </div>
   );

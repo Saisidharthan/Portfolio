@@ -227,17 +227,20 @@ export const COMMANDS_HELP = [
   { cmd: 'open <name>', desc: 'Open project/link in browser (github, linkedin, etc.)' },
   { cmd: 'education', desc: 'Show education background' },
   { cmd: 'experience', desc: 'Show work experience' },
+  { cmd: 'timeline', desc: 'Visual career timeline' },
   { cmd: 'contact', desc: 'Show contact information & links' },
   { cmd: 'resume', desc: 'Open resume in a new tab' },
   { cmd: 'history', desc: 'Show command history' },
   { cmd: 'clear', desc: 'Clear the terminal' },
+  { cmd: 'demo', desc: 'Auto-pilot demo of the portfolio' },
+  { cmd: 'visitor', desc: 'See your visitor number' },
 ];
 
 export const ALL_COMMANDS = [
   'help', 'whoami', 'neofetch', 'skills', 'projects', 'project', 'open', 'resume',
   'education', 'experience', 'contact', 'ls', 'cat', 'history',
   'clear', 'theme', 'date', 'uname', 'sudo', 'rm', 'exit',
-  'pwd', 'echo', 'man', 'wget', 'curl', 'ping', 'ssh', 'cd',
+  'pwd', 'echo', 'man', 'wget', 'curl', 'ping', 'ssh', 'cd', 'demo', 'timeline', 'visitor',
 ];
 
 export const THEMES: Record<string, Record<string, string>> = {

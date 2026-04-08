@@ -20,11 +20,13 @@ export interface CommandResult {
   theme?: Record<string, string>;
   openUrl?: string;
   experienceCards?: ExperienceCard[];
+  startDemo?: boolean;
 }
 
 export function processCommand(
   input: string,
-  history: string[]
+  history: string[],
+  visitorCount?: number | null
 ): CommandResult {
   const trimmed = input.trim();
   const [cmd, ...args] = trimmed.split(/\s+/);
@@ -49,6 +51,8 @@ export function processCommand(
       return { output: formatEducation() };
     case 'experience':
       return formatExperience();
+    case 'timeline':
+      return { output: formatTimeline() };
     case 'contact':
       return { output: formatContact() };
     case 'resume':
@@ -64,6 +68,8 @@ export function processCommand(
       return { output: formatHistory(history) };
     case 'clear':
       return { output: '', clear: true };
+    case 'visitor':
+      return { output: formatVisitor(visitorCount) };
     case 'theme':
       return handleTheme(args[0]);
     case 'date':
@@ -77,6 +83,8 @@ export function processCommand(
       return { output: '\x1b[green]/home/sai/portfolio' };
     case 'echo':
       return { output: `\x1b[white]${args.join(' ')}` };
+    case 'demo':
+      return { output: '\x1b[green]Starting demo mode...\x1b[dim]\n  Sit back and watch. Press any key to exit.', startDemo: true };
     case 'sudo':
       return handleSudo(args);
     case 'rm':
@@ -546,6 +554,34 @@ function handleRm(args: string[]): CommandResult {
   };
 }
 
+function formatTimeline(): string {
+  return `\x1b[cyan]─── Career Timeline ───────────────────────────────────────
+
+  \x1b[dim]2024
+  \x1b[dim]  │
+  \x1b[dim]  ├──\x1b[green] ● \x1b[white]GenAI Engineer — GyanMatrix Technologies
+  \x1b[dim]  │   \x1b[dim]4 months · Built KYC bot with GenAI
+  \x1b[dim]  │
+  \x1b[dim]  ├──\x1b[green] ● \x1b[white]BSP Engineer — LG Soft India (LGSI)
+  \x1b[dim]  │   \x1b[dim]8 months · MCP integrations for TV boards
+  \x1b[dim]  │
+  \x1b[dim]2025
+  \x1b[dim]  │
+  \x1b[dim]  ├──\x1b[yellow] ● \x1b[white]Co-Founder — Synergeek Technologies
+  \x1b[dim]  │   \x1b[dim]1.7 yrs · Built & scaled the company
+  \x1b[dim]  │
+  \x1b[dim]2026
+  \x1b[dim]  │
+  \x1b[dim]  ├──\x1b[cyan] ● \x1b[white]SDE — Riverline AI
+  \x1b[dim]  │   \x1b[cyan]Current · DevOps, InfoSec, ISO/SOC2
+  \x1b[dim]  │
+  \x1b[dim]  ▼
+  \x1b[dim]  \x1b[green]What's next?
+
+\x1b[dim]──────────────────────────────────────────────────────────
+  \x1b[dim]Type \x1b[yellow]experience\x1b[dim] for detailed work history.`;
+}
+
 function handleOpen(name: string): CommandResult {
   if (!name) {
     return {
@@ -586,4 +622,15 @@ function handleOpen(name: string): CommandResult {
   return {
     output: `\x1b[red]"${name}" not found.\x1b[dim] Try \x1b[yellow]open github\x1b[dim], \x1b[yellow]open linkedin\x1b[dim], or \x1b[yellow]open <project-name>`,
   };
+}
+
+function formatVisitor(count?: number | null): string {
+  return `
+\x1b[cyan]╭─ Visitor Stats ───────────────────────────────────────╮
+\x1b[cyan]│                                                        │
+\x1b[cyan]│  \x1b[yellow]You are visitor   \x1b[white]#${count || '???'}
+\x1b[cyan]│                                                        │
+\x1b[cyan]│  \x1b[dim]Thanks for stopping by!                               │
+\x1b[cyan]│                                                        │
+\x1b[cyan]╰────────────────────────────────────────────────────────╯`;
 }
