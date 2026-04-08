@@ -463,37 +463,6 @@ export default function Terminal() {
               <div className="whitespace-pre-wrap break-words">
                 {parseAnsi(card.text)}
               </div>
-              {card.image && (
-                <div
-                  className="shrink-0 hidden sm:block"
-                  style={{ marginTop: '8px' }}
-                >
-                  <img
-                    src={card.image}
-                    alt={card.imageAlt || ''}
-                    style={{
-                      width: '130px',
-                      height: '85px',
-                      objectFit: 'cover',
-                      borderRadius: '4px',
-                      border: '1px solid rgba(80, 250, 123, 0.2)',
-                      opacity: 0.85,
-                      filter: 'grayscale(0.3)',
-                    }}
-                  />
-                  <div
-                    style={{
-                      fontSize: '10px',
-                      color: '#44475a',
-                      marginTop: '3px',
-                      textAlign: 'center',
-                      fontFamily: "'JetBrains Mono', monospace",
-                    }}
-                  >
-                    {card.imageAlt}
-                  </div>
-                </div>
-              )}
             </div>
           ))}
           <div className="whitespace-pre-wrap break-words">
